@@ -5,38 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jarvis — AI Helper</title>
 <style>
-:root{--bg:#0f172a;--surface:#1e293b;--surface2:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#8b5cf6;--accent2:#06b6d4;--border:#334155;--user:#2563eb;--agent:#334155}
-html[data-theme="light"]{--bg:#f1f5f9;--surface:#ffffff;--surface2:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#7c3aed;--accent2:#0891b2;--border:#cbd5e1;--user:#2563eb;--agent:#e2e8f0}
+:root{--bg:#050d1a;--surface:#0b1c30;--surface2:#12283f;--text:#eaf6ff;--muted:#8fb3d1;--accent:#38bdf8;--accent2:#22d3ee;--glow:#38bdf8;--border:#1e3a52;--user:#0e7490;--agent:#12283f;--gold:#fbbf24}
+html[data-theme="light"]{--bg:#e8f2fa;--surface:#ffffff;--surface2:#dbeafe;--text:#0f172a;--muted:#475569;--accent:#0284c7;--accent2:#0891b2;--glow:#0284c7;--border:#bfdbfe;--user:#0284c7;--agent:#e0f2fe}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-header{background:linear-gradient(135deg,#0c4a6e,#1d4ed8,#38bdf8);color:#fff;padding:22px 16px 18px;text-align:center}
-.arc{width:64px;height:64px;border-radius:50%;margin:0 auto 8px;background:radial-gradient(circle,#e0f2fe 0%,#7dd3fc 30%,#0284c7 65%,#0c4a6e 100%);border:4px solid #bae6fd;box-shadow:0 0 24px #38bdf8,0 0 60px #38bdf8;animation:arcPulse 2.5s ease-in-out infinite}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(1000px 600px at 50% -10%,#0e2a4a 0%,var(--bg) 55%);color:var(--text);min-height:100vh}
+/* HUD top bar */
+.hudbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 16px;background:rgba(5,13,26,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);font-size:.85rem}
+html[data-theme="light"] .hudbar{background:rgba(232,242,250,.92)}
+.hudbar .brand{font-weight:800;letter-spacing:.14em;color:var(--accent)}
+.hudbar .stat{color:var(--muted);white-space:nowrap}
+.hudbar .stat b{color:#4ade80}
+.hudbar .clock{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text)}
+header{background:linear-gradient(135deg,#0c4a6e,#1d4ed8,#38bdf8);color:#fff;padding:18px 16px 14px;text-align:center;position:relative;overflow:hidden}
+header::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 46px,rgba(255,255,255,.04) 46px 47px);pointer-events:none}
+.arc{width:64px;height:64px;border-radius:50%;margin:0 auto 8px;background:radial-gradient(circle,#e0f2fe 0%,#7dd3fc 30%,#0284c7 65%,#0c4a6e 100%);border:4px solid #bae6fd;box-shadow:0 0 24px #38bdf8,0 0 60px #38bdf8;animation:arcPulse 2.5s ease-in-out infinite;position:relative;z-index:1}
 @keyframes arcPulse{0%,100%{box-shadow:0 0 18px #38bdf8,0 0 40px #38bdf8}50%{box-shadow:0 0 32px #7dd3fc,0 0 80px #38bdf8}}
-.statusline{margin-top:8px;font-size:.9rem;opacity:.95}
-.statusline .dot{color:#4ade80}
-header h1{font-size:1.9rem}
-header p{opacity:.9;margin-top:4px}
-.topbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinRev{to{transform:rotate(-360deg)}}
+@keyframes waveBar{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes blink{50%{opacity:.25}}
+.statusline{margin-top:8px;font-size:.9rem;opacity:.95;position:relative;z-index:1}
+.statusline .dot{color:#4ade80;animation:blink 2s infinite}
+header h1{font-size:1.9rem;position:relative;z-index:1}
+header p{opacity:.9;margin-top:4px;position:relative;z-index:1}
+.topbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1}
 .topbar button{background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.4);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:.95rem}
-main{max-width:720px;margin:0 auto;padding:16px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px}
+main{max-width:1080px;margin:0 auto;padding:16px}
+/* HUD core */
+.hud{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:14px;margin-bottom:16px}
+.hudCore{text-align:center;padding:18px 12px;position:relative}
+.coreWrap{position:relative;width:190px;height:190px;margin:6px auto}
+.coreRing{position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(56,189,248,.55);animation:spin 24s linear infinite}
+.coreRing2{position:absolute;inset:14px;border-radius:50%;border:1px solid rgba(56,189,248,.35);animation:spinRev 16s linear infinite}
+.coreRing2::after{content:'';position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:var(--glow);box-shadow:0 0 10px var(--glow)}
+.core{position:absolute;inset:34px;border-radius:50%;background:radial-gradient(circle,#e0f2fe 0%,#7dd3fc 30%,#0284c7 65%,#0c4a6e 100%);border:4px solid #bae6fd;box-shadow:0 0 30px #38bdf8,0 0 70px #38bdf8;animation:arcPulse 2.5s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.hudGreet{font-size:1.05rem;line-height:1.5;margin-top:6px}
+.sysGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;text-align:left}
+.sysCell{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:.82rem}
+.sysCell b{display:block;font-size:1rem;color:var(--accent)}
+.sysBar{height:6px;border-radius:99px;background:var(--border);margin-top:6px;overflow:hidden}
+.sysBar i{display:block;height:100%;background:linear-gradient(90deg,#38bdf8,#22d3ee);border-radius:99px;transition:width .8s}
+.card{background:linear-gradient(180deg,rgba(56,189,248,.07),rgba(56,189,248,.02)),var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;animation:fadeUp .4s ease both}
 .card h2{font-size:1.15rem;margin-bottom:10px}
 .pers{display:flex;gap:8px;flex-wrap:wrap}
-.pers button{flex:1 1 28%;min-width:100px;padding:12px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:1rem}
-.pers button.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.pers button{flex:1 1 28%;min-width:100px;padding:12px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:1rem;transition:transform .15s,box-shadow .15s}
+.pers button:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(56,189,248,.25)}
+.pers button.active{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 0 16px rgba(56,189,248,.5)}
 #agentBar{display:flex;align-items:center;gap:12px}
 #agentAvatar{font-size:2.6rem}
 #agentName{font-size:1.3rem;font-weight:700}
 #agentTag{color:var(--muted);font-size:.9rem}
-#chatBox{height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
-.msg{max-width:85%;padding:10px 14px;border-radius:16px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.msg.agent{background:var(--agent);align-self:flex-start;border-bottom-left-radius:4px}
+#chatBox{height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
+.msg{max-width:88%;padding:10px 14px;border-radius:16px;line-height:1.45;white-space:pre-wrap;word-break:break-word;animation:fadeUp .25s ease both}
+.msg.agent{background:var(--agent);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid var(--border)}
 .msg.user{background:var(--user);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .msg .who{font-size:.75rem;opacity:.7;display:block;margin-bottom:3px}
+.msg .ts{font-size:.68rem;opacity:.55;margin-left:6px}
+.msg.typing{opacity:.75;font-style:italic}
 .chatRow{display:flex;gap:8px;margin-top:10px}
 input,textarea,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1rem}
 .chatRow input{flex:1}
-button{padding:11px 16px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:1rem;cursor:pointer}
+button{padding:11px 16px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:1rem;cursor:pointer;transition:transform .12s,filter .15s}
+button:hover{filter:brightness(1.12)}
+button:active{transform:scale(.97)}
 button.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
 button.small{padding:6px 10px;font-size:.85rem}
 .row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
@@ -45,11 +77,18 @@ ul{list-style:none}
 li{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--surface2)}
 li span{flex:1}
 li.done span{text-decoration:line-through;opacity:.6}
+li .prio{font-size:.72rem;font-weight:800;padding:3px 7px;border-radius:99px;white-space:nowrap}
+.prio.high{background:#dc2626;color:#fff}.prio.med{background:#d97706;color:#fff}.prio.low{background:#0e7490;color:#fff}
 #banner{display:none;background:#f59e0b;color:#111827;padding:12px;border-radius:12px;margin-bottom:12px;font-weight:700;text-align:center}
 .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .quick button{font-size:.85rem;padding:7px 11px}
+.sugg{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sugg button{font-size:.8rem;padding:6px 10px;background:var(--surface2);color:var(--accent);border:1px solid var(--accent)}
+.progress{height:10px;border-radius:99px;background:var(--border);overflow:hidden;margin:8px 0 4px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,#38bdf8,#22d3ee,#4ade80);transition:width .5s}
+.progressLabel{font-size:.85rem;color:var(--muted)}
 footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
-#callScreen{display:none;position:fixed;inset:0;background:linear-gradient(180deg,#0c4a6e,#0f172a);color:#fff;z-index:50;text-align:center;padding:28px 16px;overflow-y:auto}
+#callScreen{display:none;position:fixed;inset:0;background:linear-gradient(180deg,#0c4a6e,#050d1a);color:#fff;z-index:50;text-align:center;padding:28px 16px;overflow-y:auto}
 #callScreen .arcBig{width:140px;height:140px;border-radius:50%;margin:18px auto;background:radial-gradient(circle,#e0f2fe 0%,#7dd3fc 30%,#0284c7 65%,#0c4a6e 100%);border:6px solid #bae6fd;box-shadow:0 0 40px #38bdf8,0 0 110px #38bdf8;animation:arcPulse 2.5s ease-in-out infinite;font-size:4rem;display:flex;align-items:center;justify-content:center}
 #callStatus{font-size:1.1rem;opacity:.9;margin-top:6px}
 #callTimer{font-size:1.6rem;font-weight:700;margin-top:8px;font-variant-numeric:tabular-nums}
@@ -59,10 +98,25 @@ footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
 .callBtns button{border-radius:999px;padding:14px 20px;font-size:1.05rem}
 #micBtn.listening{background:#dc2626;animation:arcPulse 1.2s ease-in-out infinite}
 #callHint{opacity:.8;margin-top:12px;font-size:.9rem}
-@media(max-width:520px){header h1{font-size:1.5rem}#chatBox{height:280px}.pers button{flex:1 1 45%}}
+.wave{display:flex;gap:4px;align-items:center;justify-content:center;height:36px;margin:14px auto 0}
+.wave i{width:5px;height:14px;border-radius:99px;background:#38bdf8;box-shadow:0 0 8px #38bdf8}
+.wave.live i{animation:waveBar .7s ease-in-out infinite}
+.wave.live i:nth-child(2){animation-delay:.1s}.wave.live i:nth-child(3){animation-delay:.2s}.wave.live i:nth-child(4){animation-delay:.3s}.wave.live i:nth-child(5){animation-delay:.15s}.wave.live i:nth-child(6){animation-delay:.25s}.wave.live i:nth-child(7){animation-delay:.05s}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media(max-width:860px){.hud{grid-template-columns:1fr}.coreWrap{width:160px;height:160px}#chatBox{height:300px}}
+@media(max-width:520px){header h1{font-size:1.5rem}#chatBox{height:280px}.pers button{flex:1 1 45%}main{padding:12px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<div class="hudbar" role="banner">
+<span class="brand">◆ J.A.R.V.I.S.</span>
+<span class="stat"><b>●</b> Systems: Online</span>
+<span class="stat" id="hudClock">--:--</span>
+<span class="stat" id="hudDate"></span>
+<span class="stat" id="hudPers">Classic Jarvis</span>
+<span class="stat" id="hudSuit">Mark VII: Ready</span>
+</div>
 <header>
 <div class="arc" title="Arc reactor"></div>
 <h1 id="headerTitle">🤵 Jarvis</h1>
@@ -78,6 +132,20 @@ footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
 <main>
 <div id="banner"></div>
 
+<section class="hud" aria-label="Jarvis HUD">
+<div class="card hudCore">
+<h2>⚡ Stark Core</h2>
+<div class="coreWrap"><div class="coreRing"></div><div class="coreRing2"></div><div class="core" title="Arc reactor">🤵</div></div>
+<div class="hudGreet" id="hudGreet">Good day, sir.</div>
+<div class="sysGrid">
+<div class="sysCell">Power<b id="sysPower">98%</b><div class="sysBar"><i id="sysPowerBar" style="width:98%"></i></div></div>
+<div class="sysCell">CPU<b id="sysCpu">12%</b><div class="sysBar"><i id="sysCpuBar" style="width:12%"></i></div></div>
+<div class="sysCell">Suit<b>Mark VII</b><span style="color:#4ade80">Ready, sir</span></div>
+<div class="sysCell">Tasks<b id="sysTasks">0 done</b><span id="sysTasksSub" style="color:var(--muted)">0 total</span></div>
+</div>
+<p style="color:var(--muted);font-size:.8rem;margin-top:10px">HUD readouts are Jarvis systems (simulated), not real device data, sir.</p>
+</div>
+
 <div class="card">
 <h2>🎭 Choose your agent's personality</h2>
 <div class="pers" id="persRow"></div>
@@ -86,6 +154,7 @@ footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
 <div><div id="agentName">Jarvis</div><div id="agentTag">Friendly and always happy to help</div></div>
 </div>
 </div>
+</section>
 
 <div class="card">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin-bottom:0">💬 Chat with <span id="chatName">Jarvis</span></h2><button class="secondary" onclick="newChat()" style="padding:8px 14px">＋ New Chat</button></div>
@@ -97,12 +166,17 @@ footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
 <button class="secondary" onclick="quick('show my notes')">My notes</button>
 <button class="secondary" onclick="quick('tell me a joke')">Tell a joke</button>
 <button class="secondary" onclick="quick('help')">Help</button>
+<button class="secondary" onclick="quick('status report')">Status report</button>
+<button class="secondary" onclick="quick('what time is it')">Time</button>
 </div>
+<div class="sugg" id="suggRow"></div>
 </div>
 
 <div class="card">
 <h2>✅ Todo List</h2>
-<div class="row"><input id="todoInput" placeholder="Add a todo…"><button onclick="addTodoFromInput()">Add</button></div>
+<div class="progress"><i id="todoProgress" style="width:0%"></i></div>
+<div class="progressLabel" id="todoProgressLabel">0 of 0 done</div>
+<div class="row"><input id="todoInput" placeholder="Add a todo…"><select id="todoPrio" style="max-width:110px"><option value="med">Medium</option><option value="high">High</option><option value="low">Low</option></select><input id="todoDue" type="date" style="max-width:150px"><button onclick="addTodoFromInput()">Add</button></div>
 <ul id="todoList"></ul>
 </div>
 
@@ -115,6 +189,7 @@ footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
 
 <div class="card">
 <h2>📝 Notes</h2>
+<div class="row"><input id="noteSearch" placeholder="🔍 Search notes…" oninput="renderNotes()"></div>
 <div class="row"><textarea id="noteInput" rows="3" placeholder="Write a note…"></textarea></div>
 <div class="row"><button onclick="addNoteFromInput()">Save note</button></div>
 <ul id="noteList"></ul>
@@ -125,6 +200,7 @@ footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
 <h2 style="font-size:1.8rem">Jarvis</h2>
 <div id="callStatus">Calling…</div>
 <div id="callTimer">00:00</div>
+<div class="wave" id="callWave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <div id="callTranscript"></div>
 <div class="callBtns">
 <button id="micBtn" onclick="toggleMic()">🎤 Talk</button>
@@ -167,18 +243,20 @@ function renderPersonality(){
   document.getElementById('agentName').textContent='Jarvis';
   document.getElementById('agentTag').textContent=P().tag;
   document.getElementById('chatName').textContent='Jarvis';
+  if(typeof updateHudStats==='function')updateHudStats();
 }
 function setPersonality(k){personality=k;localStorage.setItem('jarvis_personality',k);renderPersonality();addMsg('agent',tone("Personality switched to "+P().label+"! "+P().greeting));}
 function randomPersonality(){const ks=Object.keys(PERSONALITIES);setPersonality(ks[Math.floor(Math.random()*ks.length)]);}
 function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem('jarvis_theme',theme);applyTheme();}
 function applyTheme(){document.documentElement.setAttribute('data-theme',theme);document.getElementById('themeBtn').textContent=theme==='dark'?'☀️ Light mode':'🌙 Dark mode';}
-function addMsg(who,text){const box=document.getElementById('chatBox');const d=document.createElement('div');d.className='msg '+who;d.innerHTML='<span class="who">'+(who==='agent'?'Jarvis '+P().emoji:'You')+'</span>'+esc(text);box.appendChild(d);box.scrollTop=box.scrollHeight;}
-function renderTodos(){document.getElementById('todoList').innerHTML=todos.map((t,i)=>'<li class="'+(t.done?'done':'')+'"><input type="checkbox" style="width:auto" '+(t.done?'checked':'')+' onchange="toggleTodo('+i+')"><span>'+esc(t.text)+'</span><button class="small secondary" onclick="delTodo('+i+')">✕</button></li>').join('')||'<li><span>No todos yet — add one above or in chat!</span></li>';}
-function renderReminders(){document.getElementById('remList').innerHTML=reminders.map((r,i)=>'<li><span>⏰ '+esc(r.time)+' — '+esc(r.text)+(r.fired?' (done)':'')+'</span><button class="small secondary" onclick="delReminder('+i+')">✕</button></li>').join('')||'<li><span>No reminders yet.</span></li>';}
-function renderNotes(){document.getElementById('noteList').innerHTML=notes.map((n,i)=>'<li><span>'+esc(n)+'</span><button class="small secondary" onclick="delNote('+i+')">✕</button></li>').join('')||'<li><span>No notes yet.</span></li>';}
+function addMsg(who,text){const box=document.getElementById('chatBox');const d=document.createElement('div');d.className='msg '+who;const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});d.innerHTML='<span class="who">'+(who==='agent'?'Jarvis '+P().emoji:'You')+'<span class="ts">'+ts+'</span></span>'+esc(text);box.appendChild(d);box.scrollTop=box.scrollHeight;}
+function renderTodos(){todos.forEach(t=>{if(!t.prio)t.prio='med';if(!('due' in t))t.due='';});const done=todos.filter(t=>t.done).length;const pb=document.getElementById('todoProgress');if(pb)pb.style.width=(todos.length?Math.round(done/todos.length*100):0)+'%';const pl=document.getElementById('todoProgressLabel');if(pl)pl.textContent=done+' of '+todos.length+' done';document.getElementById('todoList').innerHTML=todos.map((t,i)=>'<li class="'+(t.done?'done':'')+'"><input type="checkbox" style="width:auto" '+(t.done?'checked':'')+' onchange="toggleTodo('+i+')"><span>'+esc(t.text)+(t.due?' <small style="color:var(--muted)">📅 '+esc(t.due)+'</small>':'')+'</span><span class="prio '+t.prio+'">'+t.prio.toUpperCase()+'</span><button class="small secondary" onclick="delTodo('+i+')">✕</button></li>').join('')||'<li><span>No todos yet — add one above or in chat!</span></li>';updateHudStats();}
+function remCountdown(r){if(r.fired)return ' (done)';const n=new Date();const p=r.time.split(':');const t=new Date();t.setHours(+p[0],+p[1],0,0);let diff=Math.round((t-n)/60000);if(diff<0)diff+=1440;if(diff===0)return ' — due now';if(diff<60)return ' — in '+diff+' min';return ' — in '+Math.floor(diff/60)+'h '+(diff%60)+'m';}
+function renderReminders(){document.getElementById('remList').innerHTML=reminders.map((r,i)=>'<li><span>⏰ '+esc(r.time)+' — '+esc(r.text)+remCountdown(r)+'</span><button class="small secondary" onclick="delReminder('+i+')">✕</button></li>').join('')||'<li><span>No reminders yet.</span></li>';updateHudStats();}
+function renderNotes(){const q=(document.getElementById('noteSearch')?document.getElementById('noteSearch').value:'').toLowerCase();const shown=notes.map((n,i)=>({n:n,i:i})).filter(x=>!q||x.n.toLowerCase().includes(q));document.getElementById('noteList').innerHTML=shown.map(x=>'<li><span>'+esc(x.n)+'</span><button class="small secondary" onclick="delNote('+x.i+')">✕</button></li>').join('')||'<li><span>'+(q?'No notes match that search.':'No notes yet.')+'</span></li>';updateHudStats();}
 function renderAll(){renderTodos();renderReminders();renderNotes();}
-function addTodo(text){text=(text||'').trim();if(!text)return false;todos.push({text:text,done:false});saveAll();renderTodos();return true;}
-function addTodoFromInput(){const el=document.getElementById('todoInput');if(addTodo(el.value)){addMsg('agent',tone('Added "'+el.value.trim()+'" to your todos!'));el.value='';} }
+function addTodo(text,prio,due){text=(text||'').trim();if(!text)return false;todos.push({text:text,done:false,prio:prio||'med',due:due||''});saveAll();renderTodos();return true;}
+function addTodoFromInput(){const el=document.getElementById('todoInput');const pr=document.getElementById('todoPrio');const du=document.getElementById('todoDue');if(addTodo(el.value,pr?pr.value:'med',du?du.value:'')){addMsg('agent',tone('Added "'+el.value.trim()+'" to your todos!'));el.value='';if(du)du.value='';} }
 function toggleTodo(i){todos[i].done=!todos[i].done;saveAll();renderTodos();}
 function delTodo(i){todos.splice(i,1);saveAll();renderTodos();}
 function addNote(text){text=(text||'').trim();if(!text)return false;notes.push(text);saveAll();renderNotes();return true;}
@@ -227,19 +305,27 @@ function reply(raw){
   return tone("Hmm, I'm not sure I understood that. Try 'help' to see what I can do — I can add todos, set reminders, and take notes!");
 }
 function newChat(){const box=document.getElementById('chatBox');if(box)box.innerHTML='';try{localStorage.removeItem('jarvis_chat');}catch(e){}addMsg('agent',P().greeting);addMsg('agent',tone('Starting a fresh conversation, sir.')); }
-function sendChat(){const el=document.getElementById('chatInput');const v=el.value.trim();if(!v)return;addMsg('user',v);el.value='';const r=reply(v);if(r)addMsg('agent',r);}
+function sendChat(){const el=document.getElementById('chatInput');const v=el.value.trim();if(!v)return;addMsg('user',v);el.value='';showTyping();setTimeout(()=>{hideTyping();const r=reply(v);if(r)addMsg('agent',r);},450);}
 function quick(t){document.getElementById('chatInput').value=t;sendChat();}
 function checkReminders(){const now=new Date();const cur=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');let changed=false;reminders.forEach(r=>{if(!r.fired&&r.time===cur){r.fired=true;changed=true;const b=document.getElementById('banner');b.style.display='block';b.textContent='⏰ Reminder: '+r.text+' — it is '+cur+' now!';addMsg('agent',tone('⏰ Reminder! Time to: '+r.text));}});if(changed){saveAll();renderReminders();}}
-applyTheme();renderPersonality();renderAll();
+
+function dayGreeting(){const h=new Date().getHours();if(h<12)return 'Good morning, sir.';if(h<18)return 'Good afternoon, sir.';return 'Good evening, sir.';}
+function updateHudClock(){const n=new Date();const c=document.getElementById('hudClock');if(c)c.textContent=n.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});const d=document.getElementById('hudDate');if(d)d.textContent=n.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});const g=document.getElementById('hudGreet');if(g)g.textContent=dayGreeting()+' '+P().greeting.split('.')[0].replace('Good day, sir','').trim()+' All systems running at peak efficiency, sir.';}
+function updateHudStats(){const done=todos.filter(t=>t.done).length;const st=document.getElementById('sysTasks');if(st)st.textContent=done+' done';const ss=document.getElementById('sysTasksSub');if(ss)ss.textContent=todos.length+' total • '+reminders.length+' reminders • '+notes.length+' notes';const hp=document.getElementById('hudPers');if(hp)hp.textContent=P().label;const cpu=8+Math.floor(Math.random()*18);const cp=document.getElementById('sysCpu');if(cp)cp.textContent=cpu+'%';const cb=document.getElementById('sysCpuBar');if(cb)cb.style.width=cpu+'%';}
+function showTyping(){const box=document.getElementById('chatBox');if(!box||document.getElementById('typingMsg'))return;const d=document.createElement('div');d.className='msg agent typing';d.id='typingMsg';d.innerHTML='<span class="who">Jarvis '+P().emoji+'</span>Jarvis is thinking…';box.appendChild(d);box.scrollTop=box.scrollHeight;}
+function hideTyping(){const t=document.getElementById('typingMsg');if(t)t.remove();}
+function renderSugg(){const row=document.getElementById('suggRow');if(!row)return;const items=[['Add a todo',"add buy milk to my todo"],['Remind me','remind me to call mom at 6pm'],['Status report','status report'],['Tell a joke','tell me a joke']];row.innerHTML=items.map(x=>'<button onclick="quick(\''+x[1]+'\')">'+x[0]+'</button>').join('');}
+
+applyTheme();renderPersonality();renderAll();renderSugg();updateHudClock();updateHudStats();setInterval(updateHudClock,15000);setInterval(updateHudStats,5000);
 if(!sessionStorage.getItem('jarvis_greeted')){addMsg('agent',P().greeting);sessionStorage.setItem('jarvis_greeted','1');}
 // ---- Call Mode ----
 let inCall=false, callMuted=false, callSeconds=0, callTimerId=null, recog=null, listening=false;
 function pickVoice(){try{if(typeof window==='undefined'||!window.speechSynthesis)return null;const vs=window.speechSynthesis.getVoices()||[];return vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||vs[0]||null;}catch(e){return null;}}
-function speak(text){if(!inCall||callMuted)return;try{if(typeof window==='undefined'||!window.speechSynthesis)return;const clean=String(text).replace(/[😊😂😎🤖☀️✨🎓🤵]/g,'');const u=new SpeechSynthesisUtterance(clean);const v=pickVoice();if(v)u.voice=v;u.rate=1;u.pitch=1;window.speechSynthesis.speak(u);}catch(e){}}
+function speak(text){if(!inCall||callMuted)return;const wv=document.getElementById('callWave');if(wv)wv.classList.add('live');setTimeout(()=>{if(wv&&!listening)wv.classList.remove('live');},2500);try{if(typeof window==='undefined'||!window.speechSynthesis)return;const clean=String(text).replace(/[😊😂😎🤖☀️✨🎓🤵]/g,'');const u=new SpeechSynthesisUtterance(clean);const v=pickVoice();if(v)u.voice=v;u.rate=1;u.pitch=1;window.speechSynthesis.speak(u);}catch(e){}}
 function callSay(text,who){const t=document.getElementById('callTranscript');if(!t)return;const d=document.createElement('div');d.className='cline';d.textContent=(who==='user'?'You: ':'Jarvis: ')+text;t.appendChild(d);t.scrollTop=t.scrollHeight;}
 function fmtCallTime(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
-function startCall(){inCall=true;callMuted=false;callSeconds=0;const sc=document.getElementById('callScreen');sc.style.display='block';document.getElementById('callStatus').textContent='Calling…';document.getElementById('callTimer').textContent='00:00';document.getElementById('callTranscript').innerHTML='';document.getElementById('speakerBtn').textContent='🔊 Speaker on';setTimeout(()=>{if(!inCall)return;document.getElementById('callStatus').textContent='On call';callTimerId=setInterval(()=>{callSeconds++;document.getElementById('callTimer').textContent=fmtCallTime(callSeconds);},1000);const g='Good day, sir. Jarvis here — you are on the line with me now. How may I be of assistance, sir?';callSay(g,'agent');addMsg('agent',g);speak(g);},900);}
-function endCall(){inCall=false;if(callTimerId){clearInterval(callTimerId);callTimerId=null;}try{if(recog){recog.stop();}recog=null;listening=false;}catch(e){}try{if(typeof window!=='undefined'&&window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}const mb=document.getElementById('micBtn');if(mb){if(mb.classList)mb.classList.remove('listening');mb.textContent='🎤 Talk';}document.getElementById('callScreen').style.display='none';}
+function startCall(){inCall=true;callMuted=false;callSeconds=0;const sc=document.getElementById('callScreen');sc.style.display='block';document.getElementById('callStatus').textContent='Calling…';document.getElementById('callTimer').textContent='00:00';document.getElementById('callTranscript').innerHTML='';document.getElementById('speakerBtn').textContent='🔊 Speaker on';setTimeout(()=>{if(!inCall)return;document.getElementById('callStatus').textContent='On call';const wv=document.getElementById('callWave');if(wv)wv.classList.add('live');callTimerId=setInterval(()=>{callSeconds++;document.getElementById('callTimer').textContent=fmtCallTime(callSeconds);},1000);const g='Good day, sir. Jarvis here — you are on the line with me now. How may I be of assistance, sir?';callSay(g,'agent');addMsg('agent',g);speak(g);},900);}
+function endCall(){inCall=false;if(callTimerId){clearInterval(callTimerId);callTimerId=null;}try{if(recog){recog.stop();}recog=null;listening=false;}catch(e){}try{if(typeof window!=='undefined'&&window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}const mb=document.getElementById('micBtn');if(mb){if(mb.classList)mb.classList.remove('listening');mb.textContent='🎤 Talk';}const wv2=document.getElementById('callWave');if(wv2)wv2.classList.remove('live');document.getElementById('callScreen').style.display='none';}
 function toggleSpeaker(){callMuted=!callMuted;document.getElementById('speakerBtn').textContent=callMuted?'🔇 Speaker off':'🔊 Speaker on';if(callMuted){try{if(typeof window!=='undefined'&&window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}}}
 function toggleMic(){
   if(!inCall)return;
