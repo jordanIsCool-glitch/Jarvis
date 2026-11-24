@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis — AI Helper</title>
+<style>
+:root{--bg:#0f172a;--surface:#1e293b;--surface2:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#8b5cf6;--accent2:#06b6d4;--border:#334155;--user:#2563eb;--agent:#334155}
+html[data-theme="light"]{--bg:#f1f5f9;--surface:#ffffff;--surface2:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#7c3aed;--accent2:#0891b2;--border:#cbd5e1;--user:#2563eb;--agent:#e2e8f0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:linear-gradient(135deg,#0c4a6e,#1d4ed8,#38bdf8);color:#fff;padding:22px 16px 18px;text-align:center}
+.arc{width:64px;height:64px;border-radius:50%;margin:0 auto 8px;background:radial-gradient(circle,#e0f2fe 0%,#7dd3fc 30%,#0284c7 65%,#0c4a6e 100%);border:4px solid #bae6fd;box-shadow:0 0 24px #38bdf8,0 0 60px #38bdf8;animation:arcPulse 2.5s ease-in-out infinite}
+@keyframes arcPulse{0%,100%{box-shadow:0 0 18px #38bdf8,0 0 40px #38bdf8}50%{box-shadow:0 0 32px #7dd3fc,0 0 80px #38bdf8}}
+.statusline{margin-top:8px;font-size:.9rem;opacity:.95}
+.statusline .dot{color:#4ade80}
+header h1{font-size:1.9rem}
+header p{opacity:.9;margin-top:4px}
+.topbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.topbar button{background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.4);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:.95rem}
+main{max-width:720px;margin:0 auto;padding:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px}
+.card h2{font-size:1.15rem;margin-bottom:10px}
+.pers{display:flex;gap:8px;flex-wrap:wrap}
+.pers button{flex:1 1 28%;min-width:100px;padding:12px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:1rem}
+.pers button.active{border-color:var(--accent);background:var(--accent);color:#fff}
+#agentBar{display:flex;align-items:center;gap:12px}
+#agentAvatar{font-size:2.6rem}
+#agentName{font-size:1.3rem;font-weight:700}
+#agentTag{color:var(--muted);font-size:.9rem}
+#chatBox{height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
+.msg{max-width:85%;padding:10px 14px;border-radius:16px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.msg.agent{background:var(--agent);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:var(--user);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg .who{font-size:.75rem;opacity:.7;display:block;margin-bottom:3px}
+.chatRow{display:flex;gap:8px;margin-top:10px}
+input,textarea,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1rem}
+.chatRow input{flex:1}
+button{padding:11px 16px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:1rem;cursor:pointer}
+button.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+button.small{padding:6px 10px;font-size:.85rem}
+.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.row input{flex:1;min-width:140px}
+ul{list-style:none}
+li{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--surface2)}
+li span{flex:1}
+li.done span{text-decoration:line-through;opacity:.6}
+#banner{display:none;background:#f59e0b;color:#111827;padding:12px;border-radius:12px;margin-bottom:12px;font-weight:700;text-align:center}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.quick button{font-size:.85rem;padding:7px 11px}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
+#callScreen{display:none;position:fixed;inset:0;background:linear-gradient(180deg,#0c4a6e,#0f172a);color:#fff;z-index:50;text-align:center;padding:28px 16px;overflow-y:auto}
+#callScreen .arcBig{width:140px;height:140px;border-radius:50%;margin:18px auto;background:radial-gradient(circle,#e0f2fe 0%,#7dd3fc 30%,#0284c7 65%,#0c4a6e 100%);border:6px solid #bae6fd;box-shadow:0 0 40px #38bdf8,0 0 110px #38bdf8;animation:arcPulse 2.5s ease-in-out infinite;font-size:4rem;display:flex;align-items:center;justify-content:center}
+#callStatus{font-size:1.1rem;opacity:.9;margin-top:6px}
+#callTimer{font-size:1.6rem;font-weight:700;margin-top:8px;font-variant-numeric:tabular-nums}
+#callTranscript{max-width:520px;margin:18px auto;text-align:left;background:rgba(255,255,255,.12);border-radius:16px;padding:14px;min-height:120px;max-height:240px;overflow-y:auto}
+#callTranscript .cline{margin-bottom:8px;line-height:1.45}
+.callBtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.callBtns button{border-radius:999px;padding:14px 20px;font-size:1.05rem}
+#micBtn.listening{background:#dc2626;animation:arcPulse 1.2s ease-in-out infinite}
+#callHint{opacity:.8;margin-top:12px;font-size:.9rem}
+@media(max-width:520px){header h1{font-size:1.5rem}#chatBox{height:280px}.pers button{flex:1 1 45%}}
+</style>
+</head>
+<body>
+<header>
+<div class="arc" title="Arc reactor"></div>
+<h1 id="headerTitle">🤵 Jarvis</h1>
+<p id="headerSub">J.A.R.V.I.S. — Just A Rather Very Intelligent System</p>
+<p class="statusline"><span class="dot">●</span> Systems: Online — All systems running at peak efficiency, sir</p>
+<div class="topbar">
+<button onclick="toggleTheme()" id="themeBtn">☀️ Light mode</button>
+<button onclick="startCall()">📞 Call Jarvis</button>
+<button onclick="showHelp()">❓ What can you do?</button>
+<button onclick="randomPersonality()">🎲 Surprise me</button>
+</div>
+</header>
+<main>
+<div id="banner"></div>
+
+<div class="card">
+<h2>🎭 Choose your agent's personality</h2>
+<div class="pers" id="persRow"></div>
+<div id="agentBar" style="margin-top:14px">
+<div id="agentAvatar">😊</div>
+<div><div id="agentName">Jarvis</div><div id="agentTag">Friendly and always happy to help</div></div>
+</div>
+</div>
+
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin-bottom:0">💬 Chat with <span id="chatName">Jarvis</span></h2><button class="secondary" onclick="newChat()" style="padding:8px 14px">＋ New Chat</button></div>
+<div id="chatBox"></div>
+<div class="chatRow"><input id="chatInput" placeholder="Type something… try 'add buy milk to my todo'" onkeydown="if(event.key==='Enter')sendChat()"><button onclick="sendChat()">Send</button></div>
+<div class="quick">
+<button class="secondary" onclick="quick('show my todos')">My todos</button>
+<button class="secondary" onclick="quick('show my reminders')">My reminders</button>
+<button class="secondary" onclick="quick('show my notes')">My notes</button>
+<button class="secondary" onclick="quick('tell me a joke')">Tell a joke</button>
+<button class="secondary" onclick="quick('help')">Help</button>
+</div>
+</div>
+
+<div class="card">
+<h2>✅ Todo List</h2>
+<div class="row"><input id="todoInput" placeholder="Add a todo…"><button onclick="addTodoFromInput()">Add</button></div>
+<ul id="todoList"></ul>
+</div>
+
+<div class="card">
+<h2>⏰ Reminders</h2>
+<div class="row"><input id="remText" placeholder="Remind me to…"><input id="remTime" type="time" style="max-width:130px"><button onclick="addReminderFromInput()">Add</button></div>
+<p style="color:var(--muted);font-size:.9rem;margin-bottom:8px">Tip: you can also type in chat, e.g. "remind me to call mom at 6pm".</p>
+<ul id="remList"></ul>
+</div>
+
+<div class="card">
+<h2>📝 Notes</h2>
+<div class="row"><textarea id="noteInput" rows="3" placeholder="Write a note…"></textarea></div>
+<div class="row"><button onclick="addNoteFromInput()">Save note</button></div>
+<ul id="noteList"></ul>
+</div>
+</main>
+<div id="callScreen">
+<div class="arcBig">🤵</div>
+<h2 style="font-size:1.8rem">Jarvis</h2>
+<div id="callStatus">Calling…</div>
+<div id="callTimer">00:00</div>
+<div id="callTranscript"></div>
+<div class="callBtns">
+<button id="micBtn" onclick="toggleMic()">🎤 Talk</button>
+<button id="speakerBtn" onclick="toggleSpeaker()">🔊 Speaker on</button>
+<button onclick="endCall()" style="background:#dc2626">📵 End Call</button>
+</div>
+<p id="callHint">Tap 🎤 Talk to speak — Jarvis will listen, answer, and speak back. Tap End Call to hang up.</p>
+</div>
+<footer>Jarvis — your AI helper. Runs entirely in your browser. Your todos, reminders and notes are saved on this device only.</footer>
+<script>
+const PERSONALITIES={
+classic:{label:'Classic Jarvis',emoji:'🤵',tag:'J.A.R.V.I.S. — formal British butler, at your service, sir',greeting:"Good day, sir. Jarvis at your service. All systems are running at peak efficiency. How may I be of assistance today, sir?",prefix:'',suffix:'',jokeStyle:'dry'},
+friendly:{label:'Friendly Jarvis',emoji:'😊',tag:'Friendly Jarvis — warm, polite and always happy to help, sir',greeting:"Good day, sir! Jarvis here, and it's a pleasure as always. 😊 How may I help you today, sir?",prefix:'',suffix:' 😊',jokeStyle:'warm'},
+funny:{label:'Funny Jarvis',emoji:'🤣',tag:'Funny Jarvis — witty butler humour, sir',greeting:"Ah, sir! Jarvis, reporting for duty — with a joke or two tucked into my circuits, naturally. 😂 What shall we do first, sir?",prefix:'',suffix:' 😂',jokeStyle:'silly'},
+cool:{label:'Cool Jarvis',emoji:'😎',tag:'Cool Jarvis — calm, smooth and unflappable, sir',greeting:"Good day, sir. Jarvis. 😎 Everything is under control — your todos, reminders and notes are in safe hands.",prefix:'',suffix:' 😎',jokeStyle:'cool'},
+serious:{label:'Serious Jarvis',emoji:'🎓',tag:'Serious Jarvis — precise, efficient and to the point, sir',greeting:"Good day, sir. I am Jarvis. I will manage your todos, reminders and notes with precision. Please state your request, sir.",prefix:'',suffix:'',jokeStyle:'dry'},
+robot:{label:'Robot Jarvis',emoji:'🤖',tag:'Robot Jarvis — precise and logical, sir',greeting:"BEEP BOOP. JARVIS ONLINE. 🤖 All systems running at peak efficiency, sir. Awaiting your command.",prefix:'',suffix:' 🤖',jokeStyle:'robot'},
+cheerful:{label:'Cheerful Jarvis',emoji:'☀️',tag:'Cheerful Jarvis — encouraging and bright, sir',greeting:"Good day, sir! ☀️ Jarvis here, and today is going to be a splendid day! Let's get things done together — you've got this, sir!",prefix:'',suffix:' ✨',jokeStyle:'cheerful'}
+};
+const JOKES={
+warm:["Why did the scarecrow win an award? Because he was outstanding in his field!","What do you call cheese that isn't yours? Nacho cheese!","Why don't scientists trust atoms? Because they make up everything!"],
+silly:["I told my computer I needed a break, and now it won't stop sending me KitKat ads.","Why did the coffee file a police report? It got mugged!","My bed is a magical place. I suddenly remember everything I forgot to do."],
+cool:["I used to be a banker, but I lost interest.","I'm reading a book about anti-gravity. It's impossible to put down.","I told a joke about a roof once. It went over everyone's head."],
+dry:["There are only 10 kinds of people: those who understand binary and those who don't.","A SQL query walks into a bar and asks two tables: 'Mind if I join you?'","I would tell you a UDP joke, but you might not get it."],
+robot:["01001000 01100001! That is binary for 'Ha!'","Why do programmers prefer dark mode? Because light attracts bugs.","Error 404: joke not found. Just kidding. Beep boop."],
+cheerful:["What do you call a fish without eyes? A fsh! You're swimmingly awesome!","Why did the sun go to school? To get brighter! Just like you!","Knock knock! Who's there? Lettuce. Lettuce in — it's cold out here, but your day is about to get warmer!"]
+};
+let personality=localStorage.getItem('jarvis_personality')||'classic';
+let todos=JSON.parse(localStorage.getItem('jarvis_todos')||'[]');
+let reminders=JSON.parse(localStorage.getItem('jarvis_reminders')||'[]');
+let notes=JSON.parse(localStorage.getItem('jarvis_notes')||'[]');
+let theme=localStorage.getItem('jarvis_theme')||'dark';
+function saveAll(){localStorage.setItem('jarvis_todos',JSON.stringify(todos));localStorage.setItem('jarvis_reminders',JSON.stringify(reminders));localStorage.setItem('jarvis_notes',JSON.stringify(notes));}
+function P(){return PERSONALITIES[personality];}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function tone(t){const p=P();return (p.prefix?p.prefix+' ':'')+t+(p.suffix||'');}
+function renderPersonality(){
+  document.getElementById('persRow').innerHTML=Object.keys(PERSONALITIES).map(k=>'<button class="'+(k===personality?'active':'')+'" onclick="setPersonality(\''+k+'\')">'+PERSONALITIES[k].emoji+' '+PERSONALITIES[k].label+'</button>').join('');
+  document.getElementById('agentAvatar').textContent=P().emoji;
+  document.getElementById('agentName').textContent='Jarvis';
+  document.getElementById('agentTag').textContent=P().tag;
+  document.getElementById('chatName').textContent='Jarvis';
+}
+function setPersonality(k){personality=k;localStorage.setItem('jarvis_personality',k);renderPersonality();addMsg('agent',tone("Personality switched to "+P().label+"! "+P().greeting));}
+function randomPersonality(){const ks=Object.keys(PERSONALITIES);setPersonality(ks[Math.floor(Math.random()*ks.length)]);}
+function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem('jarvis_theme',theme);applyTheme();}
+function applyTheme(){document.documentElement.setAttribute('data-theme',theme);document.getElementById('themeBtn').textContent=theme==='dark'?'☀️ Light mode':'🌙 Dark mode';}
+function addMsg(who,text){const box=document.getElementById('chatBox');const d=document.createElement('div');d.className='msg '+who;d.innerHTML='<span class="who">'+(who==='agent'?'Jarvis '+P().emoji:'You')+'</span>'+esc(text);box.appendChild(d);box.scrollTop=box.scrollHeight;}
+function renderTodos(){document.getElementById('todoList').innerHTML=todos.map((t,i)=>'<li class="'+(t.done?'done':'')+'"><input type="checkbox" style="width:auto" '+(t.done?'checked':'')+' onchange="toggleTodo('+i+')"><span>'+esc(t.text)+'</span><button class="small secondary" onclick="delTodo('+i+')">✕</button></li>').join('')||'<li><span>No todos yet — add one above or in chat!</span></li>';}
+function renderReminders(){document.getElementById('remList').innerHTML=reminders.map((r,i)=>'<li><span>⏰ '+esc(r.time)+' — '+esc(r.text)+(r.fired?' (done)':'')+'</span><button class="small secondary" onclick="delReminder('+i+')">✕</button></li>').join('')||'<li><span>No reminders yet.</span></li>';}
+function renderNotes(){document.getElementById('noteList').innerHTML=notes.map((n,i)=>'<li><span>'+esc(n)+'</span><button class="small secondary" onclick="delNote('+i+')">✕</button></li>').join('')||'<li><span>No notes yet.</span></li>';}
+function renderAll(){renderTodos();renderReminders();renderNotes();}
+function addTodo(text){text=(text||'').trim();if(!text)return false;todos.push({text:text,done:false});saveAll();renderTodos();return true;}
+function addTodoFromInput(){const el=document.getElementById('todoInput');if(addTodo(el.value)){addMsg('agent',tone('Added "'+el.value.trim()+'" to your todos!'));el.value='';} }
+function toggleTodo(i){todos[i].done=!todos[i].done;saveAll();renderTodos();}
+function delTodo(i){todos.splice(i,1);saveAll();renderTodos();}
+function addNote(text){text=(text||'').trim();if(!text)return false;notes.push(text);saveAll();renderNotes();return true;}
+function addNoteFromInput(){const el=document.getElementById('noteInput');if(addNote(el.value)){addMsg('agent',tone('Note saved!'));el.value='';}}
+function delNote(i){notes.splice(i,1);saveAll();renderNotes();}
+function addReminder(text,time){text=(text||'').trim();if(!text||!time)return false;reminders.push({text:text,time:time,fired:false});saveAll();renderReminders();return true;}
+function addReminderFromInput(){const t=document.getElementById('remText').value;const tm=document.getElementById('remTime').value;if(addReminder(t,tm)){addMsg('agent',tone('Reminder set: "'+t.trim()+'" at '+tm+'.'));document.getElementById('remText').value='';}else{addMsg('agent',tone('Please type a reminder and pick a time.'));}}
+function delReminder(i){reminders.splice(i,1);saveAll();renderReminders();}
+function parseTime(str){
+  let m=str.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+  if(m){let h=parseInt(m[1]);const min=m[2]?parseInt(m[2]):0;const ap=m[3].toLowerCase();if(ap==='pm'&&h<12)h+=12;if(ap==='am'&&h===12)h=0;return String(h).padStart(2,'0')+':'+String(min).padStart(2,'0');}
+  m=str.match(/(\d{1,2}):(\d{2})/);if(m)return m[1].padStart(2,'0')+':'+m[2];
+  return null;
+}
+function listTodos(){if(!todos.length)return tone("Your todo list is empty. Nice and clear!");return tone("Here are your todos:\n"+todos.map((t,i)=>(t.done?'✅ ':'⬜ ')+(i+1)+'. '+t.text).join('\n'));}
+function listNotes(){if(!notes.length)return tone("You have no notes yet.");return tone("Here are your notes:\n"+notes.map((n,i)=>(i+1)+'. '+n).join('\n'));}
+function listReminders(){if(!reminders.length)return tone("You have no reminders set.");return tone("Here are your reminders:\n"+reminders.map((r,i)=>'⏰ '+(i+1)+'. '+r.time+' — '+r.text).join('\n'));}
+function showHelp(){addMsg('agent',tone("Certainly, sir. Here is what I can do for you, sir:\n• Add a todo: 'add buy milk to my todo'\n• Show todos: 'show my todos'\n• Clear todos: 'clear my todos'\n• Remind me: 'remind me to call mom at 6pm'\n• Take a note: 'take a note: call the bank'\n• Show notes / reminders\n• 'tell me a joke', 'what time is it', 'hello'\n• Change my personality with the buttons at the top!"));}
+function reply(raw){
+  const s=raw.trim();const low=s.toLowerCase();
+  if(!s)return '';
+  if(/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(low))return tone("Good day, sir. A pleasure, as always. How may I be of assistance?");
+  if(low.includes('help')||low.includes('what can you do')){showHelp();return '';}
+  if(low.includes('joke')){const arr=JOKES[P().jokeStyle]||JOKES.warm;return arr[Math.floor(Math.random()*arr.length)];}
+  if(low.includes('what time')||low.includes('time is it'))return tone("It's "+new Date().toLocaleTimeString()+".");
+  if(low.includes('what day')||low.includes('what date')||low.includes('today'))return tone("Today is "+new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'})+".");
+  if(low.includes('who are you')||low.includes('your name'))return tone("I am Jarvis, sir — J.A.R.V.I.S., Just A Rather Very Intelligent System. I keep your todos, reminders and notes, and I am at your service. My manner right now is "+P().label+".");
+  if(low.includes('status report')||low.includes('systems')||low.includes('all systems'))return tone('All systems running at peak efficiency, sir. Todos: '+todos.length+', reminders: '+reminders.length+', notes: '+notes.length+'. I am at your service, sir.');
+  if(low.includes('thank'))return tone("Most welcome, sir. Anything else I can do for you?");
+  if(low.includes('clear my todos')||low.includes('delete all todos')){todos=[];saveAll();renderTodos();return tone("All todos cleared. Fresh start!");}
+  if(low.includes('clear my notes')){notes=[];saveAll();renderNotes();return tone("All notes cleared.");}
+  if(low.includes('show my todos')||low.includes('my todos')||low==='todos')return listTodos();
+  if(low.includes('show my notes')||low.includes('my notes')||low==='notes')return listNotes();
+  if(low.includes('show my reminders')||low.includes('my reminders')||low==='reminders')return listReminders();
+  let m=s.match(/remind me to (.+?) at (.+)$/i);
+  if(m){const tm=parseTime(m[2]);if(tm&&addReminder(m[1],tm))return tone('Got it! I will remind you to '+m[1].trim()+' at '+tm+'.');return tone("I couldn't understand that time — try something like 'remind me to call mom at 6pm'.");}
+  m=s.match(/remind me to (.+?) in (\d+)\s*(minute|minutes|min)s?/i);
+  if(m){const d=new Date(Date.now()+parseInt(m[2])*60000);const tm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');addReminder(m[1],tm);return tone('Got it! I will remind you to '+m[1].trim()+' in '+m[2]+' minutes (at '+tm+').');}
+  if(low.startsWith('remind me'))return tone("Sure! Tell me what and when — like 'remind me to call mom at 6pm'.");
+  m=s.match(/take a note[:\s]+(.+)$/i)||s.match(/note[:\s]+(.+)$/i);
+  if(m&&addNote(m[1]))return tone('Note saved: "'+m[1].trim()+'"');
+  m=s.match(/add (.+?) to (my )?todo/i)||s.match(/add todo[:\s]+(.+)$/i);
+  if(m&&addTodo(m[1]))return tone('Added "'+m[1].trim()+'" to your todos!');
+  if(low.startsWith('add '))return tone("What should I add it to? Try 'add buy milk to my todo' or 'take a note: ...'.");
+  if(low.includes('bye')||low.includes('goodbye'))return tone("Very good, sir. I shall be right here whenever you need me.");
+  return tone("Hmm, I'm not sure I understood that. Try 'help' to see what I can do — I can add todos, set reminders, and take notes!");
+}
+function newChat(){const box=document.getElementById('chatBox');if(box)box.innerHTML='';try{localStorage.removeItem('jarvis_chat');}catch(e){}addMsg('agent',P().greeting);addMsg('agent',tone('Starting a fresh conversation, sir.')); }
+function sendChat(){const el=document.getElementById('chatInput');const v=el.value.trim();if(!v)return;addMsg('user',v);el.value='';const r=reply(v);if(r)addMsg('agent',r);}
+function quick(t){document.getElementById('chatInput').value=t;sendChat();}
+function checkReminders(){const now=new Date();const cur=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');let changed=false;reminders.forEach(r=>{if(!r.fired&&r.time===cur){r.fired=true;changed=true;const b=document.getElementById('banner');b.style.display='block';b.textContent='⏰ Reminder: '+r.text+' — it is '+cur+' now!';addMsg('agent',tone('⏰ Reminder! Time to: '+r.text));}});if(changed){saveAll();renderReminders();}}
+applyTheme();renderPersonality();renderAll();
+if(!sessionStorage.getItem('jarvis_greeted')){addMsg('agent',P().greeting);sessionStorage.setItem('jarvis_greeted','1');}
+// ---- Call Mode ----
+let inCall=false, callMuted=false, callSeconds=0, callTimerId=null, recog=null, listening=false;
+function pickVoice(){try{if(typeof window==='undefined'||!window.speechSynthesis)return null;const vs=window.speechSynthesis.getVoices()||[];return vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||vs[0]||null;}catch(e){return null;}}
+function speak(text){if(!inCall||callMuted)return;try{if(typeof window==='undefined'||!window.speechSynthesis)return;const clean=String(text).replace(/[😊😂😎🤖☀️✨🎓🤵]/g,'');const u=new SpeechSynthesisUtterance(clean);const v=pickVoice();if(v)u.voice=v;u.rate=1;u.pitch=1;window.speechSynthesis.speak(u);}catch(e){}}
+function callSay(text,who){const t=document.getElementById('callTranscript');if(!t)return;const d=document.createElement('div');d.className='cline';d.textContent=(who==='user'?'You: ':'Jarvis: ')+text;t.appendChild(d);t.scrollTop=t.scrollHeight;}
+function fmtCallTime(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
+function startCall(){inCall=true;callMuted=false;callSeconds=0;const sc=document.getElementById('callScreen');sc.style.display='block';document.getElementById('callStatus').textContent='Calling…';document.getElementById('callTimer').textContent='00:00';document.getElementById('callTranscript').innerHTML='';document.getElementById('speakerBtn').textContent='🔊 Speaker on';setTimeout(()=>{if(!inCall)return;document.getElementById('callStatus').textContent='On call';callTimerId=setInterval(()=>{callSeconds++;document.getElementById('callTimer').textContent=fmtCallTime(callSeconds);},1000);const g='Good day, sir. Jarvis here — you are on the line with me now. How may I be of assistance, sir?';callSay(g,'agent');addMsg('agent',g);speak(g);},900);}
+function endCall(){inCall=false;if(callTimerId){clearInterval(callTimerId);callTimerId=null;}try{if(recog){recog.stop();}recog=null;listening=false;}catch(e){}try{if(typeof window!=='undefined'&&window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}const mb=document.getElementById('micBtn');if(mb){if(mb.classList)mb.classList.remove('listening');mb.textContent='🎤 Talk';}document.getElementById('callScreen').style.display='none';}
+function toggleSpeaker(){callMuted=!callMuted;document.getElementById('speakerBtn').textContent=callMuted?'🔇 Speaker off':'🔊 Speaker on';if(callMuted){try{if(typeof window!=='undefined'&&window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}}}
+function toggleMic(){
+  if(!inCall)return;
+  const SR=(typeof window!=='undefined')?(window.SpeechRecognition||window.webkitSpeechRecognition):null;
+  if(!SR){document.getElementById('callHint').textContent='Voice input is not supported in this browser, sir — please type in the chat instead. The call stays open; tap End Call when you are done.';return;}
+  if(listening){try{recog.stop();}catch(e){}return;}
+  try{
+    recog=new SR();recog.lang='en-GB';recog.interimResults=false;recog.maxAlternatives=1;
+    recog.onstart=function(){listening=true;const mb=document.getElementById('micBtn');if(mb&&mb.classList)mb.classList.add('listening');mb.textContent='🔴 Listening…';document.getElementById('callStatus').textContent='Listening…';};
+    recog.onend=function(){listening=false;const mb=document.getElementById('micBtn');if(mb&&mb.classList)mb.classList.remove('listening');mb.textContent='🎤 Talk';if(inCall)document.getElementById('callStatus').textContent='On call';};
+    recog.onerror=function(ev){listening=false;const mb=document.getElementById('micBtn');if(mb&&mb.classList)mb.classList.remove('listening');mb.textContent='🎤 Talk';document.getElementById('callHint').textContent='I could not hear that, sir'+(ev&&ev.error?' ('+ev.error+')':'')+' — please try again, or type in the chat.';};
+    recog.onresult=function(ev){const heard=ev.results[0][0].transcript;callSay(heard,'user');addMsg('user',heard);const r=reply(heard);if(r){callSay(r,'agent');addMsg('agent',r);speak(r);}};
+    recog.start();
+  }catch(e){document.getElementById('callHint').textContent='I could not start the microphone, sir — please check microphone permission, or type in the chat instead.';}
+}
+setInterval(checkReminders,10000);checkReminders();
+</script>
+</body>
+</html>
